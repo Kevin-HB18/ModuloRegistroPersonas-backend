@@ -85,6 +85,28 @@ app.post('/api/insertarPersona', async (req, res) => {
     }  
   });
 
+  app.post('/api/verificarRegistro', async (req, res) => {
+    try {
+      const { IDTIPODOC, NDOCUMENTO } = req.body;     
+      const query = `SELECT COUNT(*) AS COUNT FROM persona WHERE IDTIPODOC = :IDTIPODOC AND NDOCUMENTO = :NDOCUMENTO ;`;
+      const result = await db.sequelize.query(query, {
+        replacements: {
+          IDTIPODOC,
+          NDOCUMENTO,
+        },
+        type: db.sequelize.QueryTypes.SELECT,
+      });
+  
+      // Si count es mayor que 0, significa que ya existe una combinación en la base de datos      
+      const exists = result[0].COUNT > 0;  
+      res.json({ exists });
+    } catch (error) {
+      console.error('Error al verificar el registro:', error);
+      res.status(500).json({ error: 'Error en el servidor' });
+    }
+  });
+  
+
 /*db.sequelize
 .sync({force:true})
 .then(()=>console.log('conectado a base de datos'))
